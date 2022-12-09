@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling", ]
+build-backend = "hatchling.build"
+
+[project]
+name = "fint_rtc_server"
+description = "An Scalable FPS plugin for the Yjs API and Post Execute cell"
+keywords = ["jupyter", "server", "fastapi", "pluggy", "plugins", ]
+requires-python = ">=3.7"
+dependencies = [
+    "fps >=0.0.8",
+    "jupyter_ydoc",
+    "ypy-websocket",
+    "watchfiles >=0.16.1,<1",
+    "fps-uvicorn",
+]
+dynamic = ["version", ]
+
+[project.optional-dependencies]
+#labdev = [
+#    "jupyverse",
+#    "fps-auth-base",
+#    "fps-fint-noauth",
+#    "fps-auth",
+#    "fps-contents",
+#    "fps-jupyterlab",
+#    "fps-lab",
+#    "fps-frontend",
+#    "fps-nbconvert",
+#    "fps-terminals",
+#]
+#noauth = ["fps-fint-noauth"]
+#session = ["fps-fint-session"]
+#pathfinder = ["fps-fint-pathfinder"]
+test = [
+    "mypy",
+    "types-setuptools",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-env",
+    "requests",
+    "websockets",
+    "ipykernel",
+    "pytest-asyncio",
+    "jupyter-server <2"
+]
+
+
+[project.scripts]
+fint_server = "fps_uvicorn.cli:app"
+
+[[project.authors]]
+name = "Wh1isper"
+email = "9573586@qq.com"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.license]
+text = "BSD 3-Clause License"
+
+
+[tool.check-manifest]
+ignore = [".*", ]
+
+[project.entry-points.fps_router]
+fint_rtc_server = "fint_rtc_server.routes"
+
+[project.entry-points.fps_config]
+fint_rtc_server = "fint_rtc_server.config"
+
+[project.entry-points.fps_exception]
+fint_rtc_server = "fint_rtc_server.exceptions"
+
+
+[tool.hatch.version]
+path = "fint_rtc_server/__init__.py"
