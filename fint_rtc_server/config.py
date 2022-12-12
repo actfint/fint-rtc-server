@@ -11,8 +11,6 @@ class FintRTCServerConfig(PluginModel):
     room_cleanup_wait_for: Optional[int] = 60
     doc_save_wait_for: Optional[float] = 1.0
 
-    remote_location: Optional[str] = ""
-
 
 def get_config():
     return fps_get_config(FintRTCServerConfig)

@@ -19,41 +19,8 @@ pytest_plugins = "fps.testing.fixtures"
 _here = Path(os.path.abspath(os.path.dirname(__file__)))
 
 
-@pytest.fixture(scope="session")
-def serverapp(serverapp_port, serverapp_token):
-    cmd = [
-        "jupyter-server",
-        f"--port={serverapp_port}",
-        f"--ServerApp.token={serverapp_token}",
-    ]
-
-    popen_kwargs = dict(
-        start_new_session=False,  # forward signals
-        env=os.environ.copy(),
-    )
-    proc = subprocess.Popen(cmd, **popen_kwargs)
-    yield proc
-    os.kill(int(proc.pid), signal.SIGTERM)
-    os.wait()
-
-
-@pytest.fixture(scope="session")
-def serverapp_port():
-    """Get a single random port."""
-    sock = socket.socket()
-    sock.bind(("", 0))
-    port = sock.getsockname()[1]
-    sock.close()
-    return port
-
-
-@pytest.fixture(scope="session")
-def serverapp_token():
-    return binascii.hexlify(os.urandom(20)).decode()
-
-
 @pytest.fixture
-def app(serverapp):
+def app():
     yield create_app()
 
 
@@ -108,10 +75,9 @@ def text_file(session_tmp_dir):
 
 
 @pytest.fixture
-def config(serverapp_port, session_tmp_dir, room_dir):
+def config(session_tmp_dir, room_dir):
     yield FintRTCServerConfig.parse_obj(
         {
-            "remote_location": f"http://localhost:{serverapp_port}",
             "content_dir": session_tmp_dir,
             "room_dir": room_dir,
         }
