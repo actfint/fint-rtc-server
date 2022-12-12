@@ -17,21 +17,6 @@ dependencies = [
 dynamic = ["version", ]
 
 [project.optional-dependencies]
-#labdev = [
-#    "jupyverse",
-#    "fps-auth-base",
-#    "fps-fint-noauth",
-#    "fps-auth",
-#    "fps-contents",
-#    "fps-jupyterlab",
-#    "fps-lab",
-#    "fps-frontend",
-#    "fps-nbconvert",
-#    "fps-terminals",
-#]
-#noauth = ["fps-fint-noauth"]
-#session = ["fps-fint-session"]
-#pathfinder = ["fps-fint-pathfinder"]
 test = [
     "mypy",
     "types-setuptools",
@@ -42,7 +27,6 @@ test = [
     "websockets",
     "ipykernel",
     "pytest-asyncio",
-    "jupyter-server <2"
 ]
 
 
