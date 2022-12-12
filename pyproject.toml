@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fint_rtc_server"
-description = "An Scalable FPS plugin for the Yjs API and Post Execute cell"
+description = "An FPS plugin for the Yjs API, support multiuser and using ino for YRoom"
 keywords = ["jupyter", "server", "fastapi", "pluggy", "plugins", ]
 requires-python = ">=3.7"
 dependencies = [
