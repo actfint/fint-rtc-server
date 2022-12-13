@@ -21,11 +21,10 @@ test = [
     "mypy",
     "types-setuptools",
     "pytest",
-    "pytest-asyncio",
+    "pytest-asyncio>=0.20.3",
     "pytest-env",
     "requests",
     "websockets",
-    "ipykernel",
     "pytest-asyncio",
 ]
 
