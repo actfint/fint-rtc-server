@@ -14,7 +14,7 @@ from .ystore import get_ystore_manager
 r = APIRouter()
 
 
-@r.websocket("/api/yjs/{path}")
+@r.websocket("/rtc/{path}")
 async def mapped_yjs_endpoint(
     path,
     user: User = Depends(current_user()),

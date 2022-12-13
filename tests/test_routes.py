@@ -52,7 +52,7 @@ async def test_ydoc_notebook(client, ipynb_file):
         "source": "",
     }
 
-    with client.websocket_connect(f"/api/yjs/{path}") as websocket:
+    with client.websocket_connect(f"/rtc/{path}") as websocket:
         ydoc = Y.YDoc()
         ynb = YNotebook(ydoc)
         WebsocketProvider(ydoc, WebsocketAdaptor(websocket))
@@ -73,7 +73,7 @@ async def test_ydoc_text(client, text_file):
     path, file_path = text_file
     content = "this is a test content"
 
-    with client.websocket_connect(f"/api/yjs/{path}") as websocket:
+    with client.websocket_connect(f"/rtc/{path}") as websocket:
         ydoc = Y.YDoc()
         ytext = YFile(ydoc)
         WebsocketProvider(ydoc, WebsocketAdaptor(websocket))
