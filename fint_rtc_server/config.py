@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from fps.config import PluginModel
@@ -6,8 +7,8 @@ from fps.hooks import register_config, register_plugin_name
 
 
 class FintRTCServerConfig(PluginModel):
-    content_dir: Optional[str] = "/var/fint/rtc-server/"
-    room_dir: Optional[str] = "/var/fint/rtc-room"
+    content_dir: Optional[str] = os.getenv("FINT_RTC_CONTENT_DIR", "/var/fint/rtc-server/")
+    room_dir: Optional[str] = os.getenv("FINT_RTC_ROOM_DIR", "/var/fint/rtc-room")
     room_cleanup_wait_for: Optional[int] = 60
     doc_save_wait_for: Optional[float] = 1.0
 
