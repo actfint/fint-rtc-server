@@ -25,6 +25,3 @@ class UidMappedUserManager(MultiuserManager, metaclass=Singleton):
     async def get_user_file_path(self, user: User, path, *args, **kwargs) -> Path:
         p = Path(self.root_dir) / user.user_id / path
         return p
-
-    async def get_user_server_location(self, user, *args, **kwargs) -> str:
-        pass
