@@ -1,0 +1,9 @@
+[fint-rtc-server]
+#content_dir = '/var/fint/rtc-server/'
+#room_dir = '/var/fint/rtc-room'
+
+
+[uvicorn]
+host = ""
+port = 8080
+open_browser = 'False'

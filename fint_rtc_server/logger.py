@@ -1,5 +1,9 @@
-from logging import DEBUG
+import os
 
 from fps.logging import get_configured_logger
 
-logger = get_configured_logger(__package__, "debug")
+DEBUG_ON = os.getenv("FINT_RTC_DEBUG_ON") in ["true", "True"]
+
+level = "info" if not DEBUG_ON else "debug"
+
+logger = get_configured_logger(__package__, level)
