@@ -92,13 +92,14 @@ class WebSocketSessionManager(BaseSessionManager, metaclass=Singleton):
         if not p.exists():
             logger.info(f"{p} has been deleted, close all session")
             return await self.close_all_session(file_path, "File deleted")
-        try:
-            async for changes in awatch(p):
-                for change, _ in changes:
-                    if change == Change.deleted:
-                        logger.info(f"{p} has been deleted, close all session")
-                        return await self.close_all_session(file_path, "File deleted")
-        except RuntimeError:
-            if not p.exists():
-                logger.info(f"{p} has been deleted, close all session")
-                return await self.close_all_session(file_path, "File deleted")
+        while True:
+            try:
+                async for changes in awatch(p):
+                    for change, _ in changes:
+                        if change == Change.deleted:
+                            logger.info(f"{p} has been deleted, close all session")
+                            return await self.close_all_session(file_path, "File deleted")
+            except RuntimeError:
+                if not p.exists():
+                    logger.info(f"{p} has been deleted, close all session")
+                    return await self.close_all_session(file_path, "File deleted")

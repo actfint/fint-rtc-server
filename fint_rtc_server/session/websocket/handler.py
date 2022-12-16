@@ -151,17 +151,18 @@ class YDocWebsocketHandler(WebsocketHandler):
 
     async def watch_file(self):
         file_path = Path(self.path)
-        try:
-            async for changes in awatch(file_path):
-                for change, _ in changes:
-                    if change == Change.deleted:
-                        logger.info(f"{file_path} has been deleted, stop watch file")
-                        return
-                await self.maybe_load_document()
-        except RuntimeError:
-            if not file_path.exists():
-                logger.info(f"{file_path} has been deleted, stop watch file")
-                return
+        while True:
+            try:
+                async for changes in awatch(file_path):
+                    for change, _ in changes:
+                        if change == Change.deleted:
+                            logger.info(f"{file_path} has been deleted, stop watch file")
+                            return
+                    await self.maybe_load_document()
+            except RuntimeError:
+                if not file_path.exists():
+                    logger.info(f"{file_path} has been deleted, stop watch file")
+                    return
 
     def on_document_change(self, event):
         try:
@@ -182,7 +183,7 @@ class YDocWebsocketHandler(WebsocketHandler):
         self.saving_document = asyncio.create_task(self.maybe_save_document())
 
     async def maybe_save_document(self):
-        # save after 1 second of inactivity to prevent too frequent saving
+        # save after save_wait_for second of inactivity to prevent too frequent saving
         await asyncio.sleep(self.save_wait_for)
         file_path = Path(self.path)
         model = await read_content(file_path, True, as_json=as_json(file_path))
@@ -241,7 +242,7 @@ class YDocWebsocketHandler(WebsocketHandler):
         model = await read_content(file_path, False)
         # do nothing if the file was saved by us
         if self.last_modified < to_datetime(model.last_modified):
-            logger.info(f"Reload document: {file_path}")
+            logger.debug(f"Reload document: {file_path}")
             model = await read_content(file_path, get_content=True, as_json=as_json(file_path))
             self.room.document.source = model.content
             self.last_modified = to_datetime(model.last_modified)
