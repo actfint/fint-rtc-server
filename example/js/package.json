@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@jupyter/ydoc": "^0.2.2",
+    "ws": "^8.5.0",
+    "y-websocket": "^1.4.1",
+    "yjs": "^13.5.43"
+  },
+  "scripts": {
+    "start": "node client.js"
+  }
+}

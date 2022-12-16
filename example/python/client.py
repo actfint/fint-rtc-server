@@ -15,6 +15,7 @@ async def get_ipynb():
         WebsocketProvider(ydoc, websocket)
         await asyncio.sleep(1)
         print(ynb.get())
+    await asyncio.sleep(0.1)  # ensure close
 
 
 async def get_text():
@@ -26,6 +27,7 @@ async def get_text():
         WebsocketProvider(ydoc, websocket)
         await asyncio.sleep(1)
         print(yf.get())
+    await asyncio.sleep(0.1)  # ensure close
 
 
 asyncio.run(get_ipynb())
