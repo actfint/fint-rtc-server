@@ -10,6 +10,34 @@ from starlette.testclient import WebSocketTestSession
 from ypy_websocket import WebsocketProvider
 
 
+async def assert_file_content(file_path, content):
+    for _ in range(5):
+        await asyncio.sleep(1)
+        with open(file_path, "r") as f:
+            content_in_file = f.read()
+            if content == content_in_file:
+                return
+    raise TimeoutError(
+        f"Timeout waiting for content == content_in_file, content:{content}, content_in_file:{content_in_file}"
+    )
+
+
+async def assert_cell_content(file_path, cell_content, cell_index):
+    for _ in range(5):
+        await asyncio.sleep(1)
+        with open(file_path, "r") as f:
+            try:
+                cells = json.loads(f.read())["cells"]
+                cell_in_file = cells[cell_index]
+            except IndexError:
+                continue
+            if cell_content == cell_in_file:
+                return
+    raise TimeoutError(
+        f"Timeout waiting for cell_content == cell_in_file, cell_content:{cell_content}, cell_in_file:{cell_in_file}"
+    )
+
+
 class WebsocketAdaptor(object):
     def __init__(self, websocket: WebSocketTestSession):
         self._websocket = websocket
@@ -57,16 +85,12 @@ async def test_ydoc_notebook(client, ipynb_file):
         ynb = YNotebook(ydoc)
         WebsocketProvider(ydoc, WebsocketAdaptor(websocket))
         # wait for load
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(1)
         with ydoc.begin_transaction() as t:
             ynb.append_cell(cell, t)
-        # wait for file saved
-        # fixme using pool instead of sleep
-        await asyncio.sleep(2)
-
-    with open(file_path, "r") as f:
-        cell_in_file = json.loads(f.read())["cells"][2]
-        assert cell == cell_in_file
+            cell_index = len(ynb.get()["cells"]) - 1
+        # transaction finished, check update
+        await assert_cell_content(file_path, cell, cell_index)
 
 
 async def test_ydoc_text(client, text_file):
@@ -80,13 +104,7 @@ async def test_ydoc_text(client, text_file):
         # wait for load
         await asyncio.sleep(0.1)
         ytext.set(content)
-        # wait for file saved
-        # fixme using pool instead of sleep
-        await asyncio.sleep(2)
-
-    with open(file_path, "r") as f:
-        content_in_file = f.read()
-        assert content == content_in_file
+        await assert_file_content(file_path, content)
 
 
 if __name__ == "__main__":

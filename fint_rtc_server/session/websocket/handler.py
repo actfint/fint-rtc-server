@@ -138,6 +138,9 @@ class YDocWebsocketHandler(WebsocketHandler):
     async def on_close(self):
         async def cleanup():
             await asyncio.sleep(self.clean_up_wait_for)
+            if self.saving_document:
+                # ensure file change saved
+                await self.saving_document
             if self.room.watcher:
                 logger.info(f"Y-CRDT Websocket closed, cancel watch file {self.path}")
                 self.room.watcher.cancel()
@@ -185,10 +188,12 @@ class YDocWebsocketHandler(WebsocketHandler):
     async def maybe_save_document(self):
         # save after save_wait_for second of inactivity to prevent too frequent saving
         await asyncio.sleep(self.save_wait_for)
+        logger.info(f"try saving {self.path}")
         file_path = Path(self.path)
         model = await read_content(file_path, True, as_json=as_json(file_path))
         if self.last_modified < to_datetime(model.last_modified):
             # file changed on disk, let's revert
+            logger.info(f"file {self.path} changed on disk, will not save file but load file")
             self.room.document.source = model.content
             self.last_modified = to_datetime(model.last_modified)
             return
@@ -196,6 +201,7 @@ class YDocWebsocketHandler(WebsocketHandler):
             # don't save if not needed
             # this also prevents the dirty flag from bouncing between windows of
             # the same document opened as different types (e.g. notebook/text editor)
+            logger.info(f"{self.path} saved")
             if is_notebook(file_path):
                 file_type = "notebook"
             else:
@@ -208,6 +214,7 @@ class YDocWebsocketHandler(WebsocketHandler):
                 "type": file_type,
             }
             await write_content(content)
+            logger.info(f"{self.path} saved")
             model = await read_content(file_path, False)
             self.last_modified = to_datetime(model.last_modified)
         self.room.document.dirty = False
