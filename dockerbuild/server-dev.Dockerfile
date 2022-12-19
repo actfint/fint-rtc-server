@@ -18,4 +18,4 @@ EXPOSE 8080
 
 CMD ["fps-uvicorn"]
 
-# docker build -t wh1isper/fint-rtc-server -f dockerbuild/server.Dockerfile .
+# docker build -t wh1isper/fint-rtc-server -f dockerbuild/server-dev.Dockerfile .

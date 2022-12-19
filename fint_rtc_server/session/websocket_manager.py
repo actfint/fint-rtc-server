@@ -66,7 +66,7 @@ class WebSocketSessionManager(BaseSessionManager, metaclass=Singleton):
     async def close_session(self, file_path, websocket: YDocWebsocketHandler, *args, **kwargs):
         self.session[file_path].remove(websocket)
         if not self.session[file_path]:
-            logger.info(f"cancel watch file: {file_path}")
+            logger.info(f"Session closed, cancel watch file: {file_path}")
             self.watcher[file_path].cancel()
             del self.watcher[file_path]
 
@@ -92,14 +92,13 @@ class WebSocketSessionManager(BaseSessionManager, metaclass=Singleton):
         if not p.exists():
             logger.info(f"{p} has been deleted, close all session")
             return await self.close_all_session(file_path, "File deleted")
-        while True:
-            try:
-                async for changes in awatch(p):
-                    for change, _ in changes:
-                        if change == Change.deleted:
-                            logger.info(f"{p} has been deleted, close all session")
-                            return await self.close_all_session(file_path, "File deleted")
-            except RuntimeError:
-                if not p.exists():
-                    logger.info(f"{p} has been deleted, close all session")
-                    return await self.close_all_session(file_path, "File deleted")
+        try:
+            async for changes in awatch(p):
+                for change, _ in changes:
+                    if change == Change.deleted:
+                        logger.info(f"{p} has been deleted, close all session")
+                        return await self.close_all_session(file_path, "File deleted")
+        except RuntimeError:
+            if not p.exists():
+                logger.info(f"{p} has been deleted, close all session")
+                return await self.close_all_session(file_path, "File deleted")

@@ -65,7 +65,7 @@ async def test_ydoc_notebook(client, ipynb_file):
         await asyncio.sleep(2)
 
     with open(file_path, "r") as f:
-        cell_in_file = json.loads(f.read())["cells"][1]
+        cell_in_file = json.loads(f.read())["cells"][2]
         assert cell == cell_in_file
 
 
@@ -90,4 +90,4 @@ async def test_ydoc_text(client, text_file):
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main(["--show-capture=sys"])

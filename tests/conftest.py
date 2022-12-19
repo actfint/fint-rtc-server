@@ -1,9 +1,5 @@
 import asyncio
-import binascii
 import os
-import signal
-import socket
-import subprocess
 import tempfile
 from pathlib import Path
 from uuid import uuid4
@@ -80,6 +76,8 @@ def config(session_tmp_dir, room_dir):
         {
             "content_dir": session_tmp_dir,
             "room_dir": room_dir,
+            "room_cleanup_wait_for": 0,
+            "doc_save_wait_for": 0.1,
         }
     )
 

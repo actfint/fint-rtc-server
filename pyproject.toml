@@ -13,7 +13,8 @@ dependencies = [
     "ypy-websocket",
     "watchfiles >=0.16.1,<1",
     "fps-uvicorn",
-    "uvicorn[standard]"
+    "uvicorn[standard]",
+    "packaging"
 ]
 dynamic = ["version", ]
 

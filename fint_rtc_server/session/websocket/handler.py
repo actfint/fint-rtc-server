@@ -139,10 +139,11 @@ class YDocWebsocketHandler(WebsocketHandler):
         async def cleanup():
             await asyncio.sleep(self.clean_up_wait_for)
             if self.room.watcher:
+                logger.info(f"Y-CRDT Websocket closed, cancel watch file {self.path}")
                 self.room.watcher.cancel()
             self.room.document.unobserve()
             self.websocket_server.delete_room(room=self.room)
-            logger.debug(f"room: {self.room} has been cleaned")
+            logger.info(f"room: {self.room} has been cleaned")
 
         logger.debug(f"Current clients in room {self.room}: {self.room.clients}")
         if not self.room.clients:
@@ -151,18 +152,17 @@ class YDocWebsocketHandler(WebsocketHandler):
 
     async def watch_file(self):
         file_path = Path(self.path)
-        while True:
-            try:
-                async for changes in awatch(file_path):
-                    for change, _ in changes:
-                        if change == Change.deleted:
-                            logger.info(f"{file_path} has been deleted, stop watch file")
-                            return
-                    await self.maybe_load_document()
-            except RuntimeError:
-                if not file_path.exists():
-                    logger.info(f"{file_path} has been deleted, stop watch file")
-                    return
+        try:
+            async for changes in awatch(file_path):
+                for change, _ in changes:
+                    if change == Change.deleted:
+                        logger.info(f"{file_path} has been deleted, stop watch file")
+                        return
+                await self.maybe_load_document()
+        except RuntimeError:
+            if not file_path.exists():
+                logger.info(f"{file_path} has been deleted, stop watch file")
+                return
 
     def on_document_change(self, event):
         try:
