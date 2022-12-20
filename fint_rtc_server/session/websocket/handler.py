@@ -8,7 +8,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 
-from watchfiles import Change, awatch
 from ypy_websocket.ystore import BaseYStore, YDocNotFound
 from ypy_websocket.yutils import YMessageType
 
@@ -31,18 +30,13 @@ def to_datetime(iso_date: str) -> datetime:
     return datetime.fromisoformat(iso_date.rstrip("Z"))
 
 
-class FileInfo(object):
-    def __init__(self, last_modified=None):
-        self.last_modified: Optional[datetime] = last_modified
-
-
 class YStoredRoom(DocRoom):
     def __init__(self, ystore: BaseYStore, is_nb_ydoc=False):
         super(YStoredRoom, self).__init__(ready=False, ystore=ystore)
         self.cleaner = None
-        self.watcher = None
         document_type = "notebook" if is_nb_ydoc else "file"
         self.document = YDOCS[document_type](self.ydoc)
+        self.last_modified: Optional[datetime] = None
 
 
 class FileMappedWebsocketServer(YRoomMappedWebsocketServer):
@@ -81,7 +75,6 @@ class YDocWebsocketHandler(WebsocketHandler):
         save_wait_for=1,
     ):
         super().__init__(websocket, ystore, permissions)
-        self.file_info = FileInfo()
         self.clean_up_wait_for = clean_up_wait_for
         self.save_wait_for = save_wait_for
 
@@ -91,11 +84,11 @@ class YDocWebsocketHandler(WebsocketHandler):
 
     @property
     def last_modified(self):
-        return self.file_info.last_modified
+        return self.room.last_modified
 
     @last_modified.setter
     def last_modified(self, value: Optional[datetime]):
-        self.file_info.last_modified = value
+        self.room.last_modified = value
 
     async def serve(self):
         self.saving_document = None
@@ -122,9 +115,6 @@ class YDocWebsocketHandler(WebsocketHandler):
                     await self.update_from_source(model)
                 self.room.document.dirty = False
                 self.room.ready = True
-                if self.room.watcher:
-                    self.room.watcher.cancel()
-                self.room.watcher = asyncio.create_task(self.watch_file())
                 # save the document when changed
                 self.room.document.observe(self.on_document_change)
 
@@ -141,9 +131,6 @@ class YDocWebsocketHandler(WebsocketHandler):
             if self.saving_document:
                 # ensure file change saved
                 await self.saving_document
-            if self.room.watcher:
-                logger.info(f"Y-CRDT Websocket closed, cancel watch file {self.path}")
-                self.room.watcher.cancel()
             self.room.document.unobserve()
             self.websocket_server.delete_room(room=self.room)
             logger.info(f"room: {self.room} has been cleaned")
@@ -152,20 +139,6 @@ class YDocWebsocketHandler(WebsocketHandler):
         if not self.room.clients:
             logger.info("no clients left, schedule cleanup task...")
             self.room.cleaner = asyncio.create_task(cleanup())
-
-    async def watch_file(self):
-        file_path = Path(self.path)
-        try:
-            async for changes in awatch(file_path):
-                for change, _ in changes:
-                    if change == Change.deleted:
-                        logger.info(f"{file_path} has been deleted, stop watch file")
-                        return
-                await self.maybe_load_document()
-        except RuntimeError:
-            if not file_path.exists():
-                logger.info(f"{file_path} has been deleted, stop watch file")
-                return
 
     def on_document_change(self, event):
         try:
@@ -188,12 +161,14 @@ class YDocWebsocketHandler(WebsocketHandler):
     async def maybe_save_document(self):
         # save after save_wait_for second of inactivity to prevent too frequent saving
         await asyncio.sleep(self.save_wait_for)
-        logger.info(f"try saving {self.path}")
+        logger.info(f"try save {self.path}")
         file_path = Path(self.path)
         model = await read_content(file_path, True, as_json=as_json(file_path))
         if self.last_modified < to_datetime(model.last_modified):
             # file changed on disk, let's revert
-            logger.info(f"file {self.path} changed on disk, will not save file but load file")
+            logger.info(
+                f"file {self.path} changed on disk, will not save file but load file(save next time)"
+            )
             self.room.document.source = model.content
             self.last_modified = to_datetime(model.last_modified)
             return
@@ -201,7 +176,6 @@ class YDocWebsocketHandler(WebsocketHandler):
             # don't save if not needed
             # this also prevents the dirty flag from bouncing between windows of
             # the same document opened as different types (e.g. notebook/text editor)
-            logger.info(f"{self.path} saved")
             if is_notebook(file_path):
                 file_type = "notebook"
             else:

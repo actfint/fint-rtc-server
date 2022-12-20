@@ -83,8 +83,19 @@ class WebSocketSessionManager(BaseSessionManager, metaclass=Singleton):
 
     async def prepare(self, file_path, websocket: YDocWebsocketHandler):
         self.session.setdefault(file_path, []).append(websocket)
-        if file_path not in self.watcher:
+        self._add_watcher(file_path)
+
+    def _add_watcher(self, file_path, recreate=False):
+        if recreate:
+            old_task = None
+            if file_path in self.watcher:
+                old_task = self.watcher[file_path]
             self.watcher[file_path] = asyncio.create_task(self.watch_file_exist(file_path))
+            if old_task:
+                old_task.cancel()
+        else:
+            if file_path not in self.watcher:
+                self.watcher[file_path] = asyncio.create_task(self.watch_file_exist(file_path))
 
     async def watch_file_exist(self, file_path):
         p = Path(file_path)
@@ -98,7 +109,19 @@ class WebSocketSessionManager(BaseSessionManager, metaclass=Singleton):
                     if change == Change.deleted:
                         logger.info(f"{p} has been deleted, close all session")
                         return await self.close_all_session(file_path, "File deleted")
-        except RuntimeError:
+                    await self.notify_update(file_path)
+        except RuntimeError as e:
+            logger.exception(e)
             if not p.exists():
                 logger.info(f"{p} has been deleted, close all session")
                 return await self.close_all_session(file_path, "File deleted")
+        except Exception as e:
+            # rewatch
+            logger.exception(e)
+            return self._add_watcher(file_path, recreate=True)
+
+    async def notify_update(self, file_path):
+        # Only need load one of session, room will broadcast
+        websocket = self.session[file_path][0]
+        if websocket.room.ready:
+            await websocket.maybe_load_document()

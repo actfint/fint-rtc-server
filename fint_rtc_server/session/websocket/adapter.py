@@ -4,6 +4,8 @@
 
 from fastapi import WebSocket, WebSocketDisconnect
 
+from fint_rtc_server.logger import logger
+
 
 class WebsocketAdapter:
     """An adapter to make a Starlette's WebSocket look like a ypy-websocket's WebSocket"""
@@ -32,7 +34,11 @@ class WebsocketAdapter:
         return message
 
     async def send(self, message):
-        await self._websocket.send_bytes(message)
+        try:
+            await self._websocket.send_bytes(message)
+        except RuntimeError as e:
+            logger.exception(e)
+            await self.close()
 
     async def recv(self):
         return await self._websocket.receive_bytes()
