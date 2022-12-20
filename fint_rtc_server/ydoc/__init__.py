@@ -1,5 +1,5 @@
 from .yfile import YFile
-from .ynotebok import YNotebook
+from .ynotebook import YNotebook
 
 ydocs = {"file": YFile, "notebook": YNotebook}
 
