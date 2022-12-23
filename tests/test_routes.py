@@ -108,4 +108,4 @@ async def test_ydoc_text(client, text_file):
 
 
 if __name__ == "__main__":
-    pytest.main(["--show-capture=sys"])
+    pytest.main()

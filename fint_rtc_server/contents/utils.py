@@ -1,6 +1,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-
+import asyncio
 import json
 import os
 from datetime import datetime
@@ -56,8 +56,15 @@ async def read_content(path: Union[str, Path], get_content: bool, as_json: bool 
                     content = await f.read()
                 if as_json:
                     content = json.loads(content)
-            except Exception:
+            except FileNotFoundError:
                 raise HTTPException(status_code=404, detail="Item not found")
+            except json.JSONDecodeError:
+                # retry, maybe saving
+                await asyncio.sleep(0.1)
+                async with await open_file(path) as f:
+                    content = await f.read()
+                if as_json:
+                    content = json.loads(content)
     format: Optional[str] = None
     if path.is_dir():
         size = None

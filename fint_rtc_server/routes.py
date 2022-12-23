@@ -7,6 +7,7 @@ from .auth import User, current_user, websocket_auth
 from .base.multiuser import MultiuserManager as UserManager
 from .base.session import SessionManager
 from .base.ystore import YStoreManager
+from .logger import logger
 from .multiuser import get_user_manager
 from .session import get_session_manager
 from .ystore import get_ystore_manager
@@ -14,7 +15,7 @@ from .ystore import get_ystore_manager
 r = APIRouter()
 
 
-@r.websocket("/rtc/{path}")
+@r.websocket("/rtc/{path:path}")
 async def mapped_yjs_endpoint(
     path,
     user: User = Depends(current_user()),
@@ -28,6 +29,7 @@ async def mapped_yjs_endpoint(
     websocket, permissions = websocket_permissions
     user_file_path = await user_manager.get_user_file_path(user, path)
     if not Path(user_file_path).exists():
+        logger.info(f"{user_file_path} not found")
         raise HTTPException(404, "file not found")
     ystore = await ystore_manager.get_ystore(user_file_path)
     await websocket.accept()
