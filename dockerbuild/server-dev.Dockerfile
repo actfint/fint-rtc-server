@@ -1,6 +1,6 @@
 FROM wh1isper/debian-python-3.8
 
-ENV FINT_RTC_DEBUG_ON true
+ENV FINT_DEBUG_ON true
 
 RUN mkdir -p /opt/rtc
 

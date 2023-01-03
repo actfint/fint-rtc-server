@@ -1,8 +1,8 @@
-import pkg_resources
+from importlib_metadata import entry_points
 
 from fint_rtc_server.logger import logger
 
-auth = {ep.name: ep.load() for ep in pkg_resources.iter_entry_points(group="fint_auth")}
+auth = {ep.name: ep.load() for ep in entry_points(group="fint_auth")}
 
 try:
     User = auth["User"]

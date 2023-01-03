@@ -1,8 +1,8 @@
-import pkg_resources
+from importlib_metadata import entry_points
 
 from fint_rtc_server.logger import logger
 
-pkg = {ep.name: ep.load() for ep in pkg_resources.iter_entry_points(group="fint_multiuser")}
+pkg = {ep.name: ep.load() for ep in entry_points(group="fint_multiuser")}
 
 try:
     get_user_manager = pkg["get_user_manager"]

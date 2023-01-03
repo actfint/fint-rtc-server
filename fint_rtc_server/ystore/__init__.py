@@ -1,8 +1,8 @@
-import pkg_resources
+from importlib_metadata import entry_points
 
 from fint_rtc_server.logger import logger
 
-pkg = {ep.name: ep.load() for ep in pkg_resources.iter_entry_points(group="fint_ystore")}
+pkg = {ep.name: ep.load() for ep in entry_points(group="fint_ystore")}
 
 try:
     get_ystore_manager = pkg["get_ystore_manager"]
