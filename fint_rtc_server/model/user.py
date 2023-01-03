@@ -1,5 +1,1 @@
-from pydantic import BaseModel
-
-
-class User(BaseModel):
-    user_id: str
+from fint_core.auth import User

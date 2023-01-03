@@ -88,8 +88,3 @@ def config_override(app, config):
         return config
 
     app.dependency_overrides[get_config] = override_get_config
-
-
-@pytest.fixture(scope="session")
-def experiment_id():
-    return "unittest-" + str(uuid4()).split("-")[0]

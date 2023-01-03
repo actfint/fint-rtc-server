@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "fint_rtc_server"
 description = "An FPS plugin for the Yjs API, support multiuser and using ino for YRoom"
-keywords = ["jupyter", "server", "fastapi", "pluggy", "plugins", ]
+keywords = ["fint-project", "yjs", "rtc", "multiuser", "fps"]
 requires-python = ">=3.7"
 dependencies = [
     "fps >=0.0.8",
@@ -14,7 +14,8 @@ dependencies = [
     "watchfiles >=0.16.1,<1",
     "fps-uvicorn",
     "uvicorn[standard]",
-    "packaging"
+    "packaging",
+    "fint_core"
 ]
 dynamic = ["version", ]
 
@@ -37,6 +38,10 @@ fint_server = "fps_uvicorn.cli:app"
 [[project.authors]]
 name = "Wh1isper"
 email = "9573586@qq.com"
+
+
+[project.urls]
+Source = "https://github.com/actfint/fint-rtc-server"
 
 [project.readme]
 file = "README.md"
