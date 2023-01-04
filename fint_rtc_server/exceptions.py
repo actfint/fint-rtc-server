@@ -1,3 +1,7 @@
+#  Copyright (c) 2023 actfint
+#  Licensed under the BSD 3-Clause License
+#  Created by @Wh1isper 2023/1/4
+
 from typing import Any, Dict, Optional
 
 from fastapi import HTTPException, Request, Response
@@ -40,13 +44,4 @@ async def server_exception_handler(request: Request, exc: ServerException) -> Re
     return response
 
 
-async def default_exception_handler(request: Request, exc: HTTPException) -> Response:
-    logger.exception(exc)
-    logger.error(f"Exception ( {exc.detail} ) occurred, response with {exc.status_code}")
-    return JSONResponse(
-        content={"detail": f"{exc.detail}"}, status_code=exc.status_code, headers=exc.headers
-    )
-
-
 h_server = register_exception_handler(ServerException, server_exception_handler)
-h_default = register_exception_handler(HTTPException, default_exception_handler)

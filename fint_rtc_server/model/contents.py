@@ -1,5 +1,6 @@
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
+#  Copyright (c) 2023 actfint
+#  Licensed under the BSD 3-Clause License
+#  Created by @Wh1isper 2023/1/4
 
 from typing import Dict, List, Optional, Union
 

@@ -1,7 +1,6 @@
-# The code implementation here is referenced from the jupyverse project
-# https://github.com/jupyter-server/jupyverse/blob/main/plugins/yjs/fps_yjs/routes.py
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
+#  Copyright (c) 2023 actfint
+#  Licensed under the BSD 3-Clause License
+#  Created by @Wh1isper 2023/1/4
 
 import asyncio
 from datetime import datetime

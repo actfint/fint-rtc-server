@@ -1,3 +1,7 @@
+#  Copyright (c) 2023 actfint
+#  Licensed under the BSD 3-Clause License
+#  Created by @Wh1isper 2023/1/4
+
 import copy
 from typing import Any, Dict
 from uuid import uuid4
