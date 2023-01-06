@@ -3,6 +3,7 @@
 #  Created by @Wh1isper 2023/1/4
 
 import asyncio
+import logging
 import os
 import tempfile
 from pathlib import Path
@@ -10,6 +11,7 @@ from uuid import uuid4
 
 import pytest
 from fps.app import create_app
+from fps.logging import configure_loggers
 
 from fint_rtc_server.auth.noauth import Anonymous
 from fint_rtc_server.config import FintRTCServerConfig, get_config
@@ -21,7 +23,12 @@ _here = Path(os.path.abspath(os.path.dirname(__file__)))
 
 @pytest.fixture
 def app():
-    yield create_app()
+    app = create_app()
+    configure_loggers(logging.root.manager.loggerDict.keys(), "warning")
+    configure_loggers(
+        (k for k in logging.root.manager.loggerDict.keys() if k.startswith("fint")), "debug"
+    )
+    yield app
 
 
 @pytest.fixture(scope="session")

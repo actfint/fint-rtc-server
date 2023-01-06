@@ -12,5 +12,5 @@ try:
     get_ystore_manager = pkg["get_ystore_manager"]
 
 except KeyError:
-    logger.info("No auth plugin found, using default room manager")
+    logger.info("No ystore plugin found, using default room manager")
     from fint_rtc_server.ystore.manager import get_ystore_manager
