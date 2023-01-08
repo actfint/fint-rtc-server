@@ -22,6 +22,14 @@ from fint_rtc_server.multiuser.manager import UidMappedUserManager
 from fint_rtc_server.multiuser.manager import (
     get_user_manager as project_get_user_manager,
 )
+from fint_rtc_server.session import get_session_manager
+from fint_rtc_server.session.websocket_manager import (
+    get_session_manager as project_get_session_manager,
+)
+from fint_rtc_server.ystore import get_ystore_manager
+from fint_rtc_server.ystore.manager import (
+    get_ystore_manager as project_get_ystore_manager,
+)
 
 pytest_plugins = "fps.testing.fixtures"
 _here = Path(os.path.abspath(os.path.dirname(__file__)))
@@ -102,5 +110,7 @@ def config_override(app, config):
 
     app.dependency_overrides[get_config] = override_get_config
     app.dependency_overrides[get_user_manager] = project_get_user_manager
+    app.dependency_overrides[get_ystore_manager] = project_get_ystore_manager
+    app.dependency_overrides[get_session_manager] = project_get_session_manager
     app.dependency_overrides[current_user] = project_current_user
     app.dependency_overrides[websocket_auth] = project_websocket_auth
