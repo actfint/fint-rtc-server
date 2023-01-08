@@ -14,13 +14,10 @@ from fint_rtc_server.config import FintRTCServerConfig, get_config
 from fint_rtc_server.logger import logger
 
 
-def get_ystore_manager():
-    def _(
-        server_config: FintRTCServerConfig = Depends(get_config),
-    ):
-        return INOMappedYStoreManager(server_config.room_dir)
-
-    return _
+def get_ystore_manager(
+    server_config: FintRTCServerConfig = Depends(get_config),
+):
+    return INOMappedYStoreManager(server_config.room_dir)
 
 
 async def metadata_callback() -> bytes:

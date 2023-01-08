@@ -10,12 +10,18 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from fps.app import create_app
-from fps.logging import configure_loggers
+from fint_test_app.app import create_app
 
+from fint_rtc_server.auth import current_user, websocket_auth
 from fint_rtc_server.auth.noauth import Anonymous
+from fint_rtc_server.auth.noauth import current_user as project_current_user
+from fint_rtc_server.auth.noauth import websocket_auth as project_websocket_auth
 from fint_rtc_server.config import FintRTCServerConfig, get_config
+from fint_rtc_server.multiuser import get_user_manager
 from fint_rtc_server.multiuser.manager import UidMappedUserManager
+from fint_rtc_server.multiuser.manager import (
+    get_user_manager as project_get_user_manager,
+)
 
 pytest_plugins = "fps.testing.fixtures"
 _here = Path(os.path.abspath(os.path.dirname(__file__)))
@@ -24,10 +30,6 @@ _here = Path(os.path.abspath(os.path.dirname(__file__)))
 @pytest.fixture
 def app():
     app = create_app()
-    configure_loggers(logging.root.manager.loggerDict.keys(), "warning")
-    configure_loggers(
-        (k for k in logging.root.manager.loggerDict.keys() if k.startswith("fint")), "debug"
-    )
     yield app
 
 
@@ -99,3 +101,6 @@ def config_override(app, config):
         return config
 
     app.dependency_overrides[get_config] = override_get_config
+    app.dependency_overrides[get_user_manager] = project_get_user_manager
+    app.dependency_overrides[current_user] = project_current_user
+    app.dependency_overrides[websocket_auth] = project_websocket_auth

@@ -25,9 +25,10 @@ class YRoomMappedWebsocketServer(WebsocketServer):
 class WebsocketHandler:
     websocket_server: YRoomMappedWebsocketServer
 
-    def __init__(self, websocket, ystore, permissions):
+    def __init__(self, websocket, ystore, user):
         self.websocket = websocket
-        self.can_write = permissions is None or "write" in permissions.get("yjs", [])
+        # todo user may not write this file
+        self.can_write = True
         self.room = self.websocket_server.get_room(ystore)
 
     async def serve(self):

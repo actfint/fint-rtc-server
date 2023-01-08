@@ -22,17 +22,14 @@ from fint_rtc_server.ystore.manager import ManagedFileYStore
 _manager = None
 
 
-def get_session_manager():
-    def _(
-        server_config: FintRTCServerConfig = Depends(get_config),
-    ):
-        return WebSocketSessionManager(
-            YDocWebsocketHandler,
-            server_config.room_cleanup_wait_for,
-            server_config.doc_save_wait_for,
-        )
-
-    return _
+def get_session_manager(
+    server_config: FintRTCServerConfig = Depends(get_config),
+):
+    return WebSocketSessionManager(
+        YDocWebsocketHandler,
+        server_config.room_cleanup_wait_for,
+        server_config.doc_save_wait_for,
+    )
 
 
 class WebSocketSessionManager(BaseSessionManager, metaclass=Singleton):
@@ -47,14 +44,14 @@ class WebSocketSessionManager(BaseSessionManager, metaclass=Singleton):
 
     @contextlib.asynccontextmanager
     async def start_session(
-        self, websocket: WebSocket, permissions, file_path: str, ystore: ManagedFileYStore
+        self, websocket: WebSocket, user, file_path: str, ystore: ManagedFileYStore
     ):
         if isinstance(file_path, Path):
             file_path = file_path.as_posix()
         socket = self.handler_cls(
             WebsocketAdapter(websocket, ystore, file_path),
             ystore,
-            permissions,
+            user,
             self.room_cleanup_wait_for,
             self.doc_save_wait_for,
         )

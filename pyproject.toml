@@ -29,6 +29,7 @@ test = [
     "requests",
     "websockets",
     "pytest-asyncio",
+    "fint_test_app",
 ]
 
 

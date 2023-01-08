@@ -69,11 +69,11 @@ class YDocWebsocketHandler(WebsocketHandler):
         self,
         websocket: WebsocketAdapter,
         ystore,
-        permissions,
+        user,
         clean_up_wait_for=60,
         save_wait_for=1,
     ):
-        super().__init__(websocket, ystore, permissions)
+        super().__init__(websocket, ystore, user)
         self.clean_up_wait_for = clean_up_wait_for
         self.save_wait_for = save_wait_for
 

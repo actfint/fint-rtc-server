@@ -4,10 +4,10 @@
 
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fps.hooks import register_router
 
-from .auth import User, current_user, websocket_auth
+from .auth import websocket_auth
 from .base.multiuser import MultiuserManager as UserManager
 from .base.session import SessionManager
 from .base.ystore import YStoreManager
@@ -23,24 +23,21 @@ r = APIRouter()
 @r.websocket("/rtc/{path:path}")
 async def mapped_yjs_endpoint(
     path,
-    user: User = Depends(current_user()),
-    user_manager: UserManager = Depends(get_user_manager()),
-    ystore_manager: YStoreManager = Depends(get_ystore_manager()),
-    session_manager: SessionManager = Depends(get_session_manager()),
-    websocket_permissions=Depends(websocket_auth(permissions={"yjs": ["read", "write"]})),
+    user_manager: UserManager = Depends(get_user_manager),
+    ystore_manager: YStoreManager = Depends(get_ystore_manager),
+    session_manager: SessionManager = Depends(get_session_manager),
+    websocket_permissions=Depends(websocket_auth),
 ):
-    if websocket_permissions is None:
+    if not websocket_permissions:
         return
-    websocket, permissions = websocket_permissions
+    websocket, user = websocket_permissions
     user_file_path = await user_manager.get_user_file_path(user, path)
     if not Path(user_file_path).exists():
         logger.info(f"{user_file_path} not found")
         raise ServerException(404, "file not found", response_detail=f"File not found: {path}")
     ystore = await ystore_manager.get_ystore(user_file_path)
     await websocket.accept()
-    async with session_manager.start_session(
-        websocket, permissions, user_file_path, ystore
-    ) as socket:
+    async with session_manager.start_session(websocket, user, user_file_path, ystore) as socket:
         await socket.serve()
 
 

@@ -12,13 +12,10 @@ from fint_rtc_server.base.singleton import Singleton
 from fint_rtc_server.config import FintRTCServerConfig, get_config
 
 
-def get_user_manager():
-    def _(
-        server_config: FintRTCServerConfig = Depends(get_config),
-    ):
-        return UidMappedUserManager(server_config.content_dir)
-
-    return _
+def get_user_manager(
+    server_config: FintRTCServerConfig = Depends(get_config),
+):
+    return UidMappedUserManager(server_config.content_dir)
 
 
 class UidMappedUserManager(MultiuserManager, metaclass=Singleton):

@@ -15,7 +15,7 @@ class SessionManager(object):
         self.handler_cls = handler_cls
 
     @contextlib.asynccontextmanager
-    async def start_session(self, websocket, permissions, file_path, ystore):
+    async def start_session(self, websocket, user, file_path, ystore):
         raise NotImplementedError
 
     async def close_session(self, *args, **kwargs):
